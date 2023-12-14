@@ -180,17 +180,45 @@ def edit_data_buku():
             print(
                 f"No: {book_num[0]} | Judul Buku: {book_num[1]} | Penulis: {book_num[2]} | Penerbit: {book_num[3]} | Tahun Terbit: {book_num[3]} | ")
 
-            # input data buku baru
-            judul = input("Masukkan judul buku: ")
-            penulis = input("Masukkan nama penulis buku: ")
-            penerbit = input("Masukkan nama penerbit buku: ")
-            tahun_terbit = input("Masukkan tahun terbit buku: ")
+            # pilihan untuk mengedit data buku
+            print("===== Pilih atribut yang ingin diedit: =====")
+            print('===== [1] Judul Buku =====')
+            print('===== [2] Penulis =====')
+            print('===== [3] Penerbit =====')
+            print('===== [4] Tahun Terbit =====')
+            print('===== [5] Semua Atribut =====')
 
-        # insert data buku baru ke database
-            cursor.execute("INSERT INTO data_buku (judul_buku, penulis, penerbit, tahun_terbit) VALUES (%s, %s, %s, %s)",
-                           (judul, penulis, penerbit, tahun_terbit))
+            try:
+                choice = int(
+                    input("Masukkan nomor atribut yang ingin diedit: "))
+            except ValueError:
+                print("===== Invalid input! =====")
 
-        # commit perubahan ke database
+            if choice == 5:
+                # jika user memilih untuk mengedit semua atribut
+                judul = input("Masukkan judul buku baru: ")
+                penulis = input("Masukkan nama penulis buku baru: ")
+                penerbit = input("Masukkan nama penerbit buku baru: ")
+                tahun_terbit = input("Masukkan tahun terbit buku baru: ")
+                # insert data buku baru ke database
+                cursor.execute("INSERT INTO data_buku (judul_buku, penulis, penerbit, tahun_terbit) VALUES (%s, %s, %s, %s)",
+                               (judul, penulis, penerbit, tahun_terbit))
+
+            elif 1 <= choice <= 4:
+                # jika user ingin mengedit atribut tertentu
+                attribute_names = ["judul_buku",
+                                   "penulis", "penerbit", "tahun_terbit"]
+                attribute_edit = attribute_names[choice - 1]
+                new_value = input(f"Masukkan {attribute_edit} baru: ")
+
+                # Update the specific attribute in the database
+                cursor.execute(f"UPDATE data_buku SET {attribute_edit} = %s WHERE id_buku = %s",
+                               (new_value, book_num[0]))
+            else:
+                print("===== Pilihan Invalid! =====")
+                return
+
+            # commit perubahan ke database
             connection.commit()
             print("===== Data baru berhasil ditambahkan! =====")
 
