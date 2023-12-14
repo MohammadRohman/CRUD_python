@@ -242,72 +242,71 @@ def tambah_data_buku():
         if connection:  # jika koneksi ada maka jalankan kode di bawah
             connection.close()
 
+# fungsi menghapus data buku
+
 
 def hapus_data_buku():
-    connection = connect_to_database()  # Connect to the database
-    if not connection:  # If connection fails, print the error message
+    connection = connect_to_database()  # memanggil fungsi ke database
+    if not connection:  # jika koneksi gagal print kode di bawah
         print("===== Error Connection! =====")
-        return  # Return from the function if the connection is not successful
 
-    cursor = connection.cursor()  # Create a cursor to execute MySQL queries
+    cursor = connection.cursor()  # digunakan untuk memanggil / mengeksekusi kode mysql
 
     try:
-        tampilkan_data_buku()  # Display book data
+        tampilkan_data_buku()  # menampilkan data buku
 
         try:
-            # User input for the book number to be deleted
+            # input untuk menghapus data buku
             select_book = int(input("Masukkan nomor buku yang akan dihapus: "))
-        except ValueError:  # Handle invalid input
+        except ValueError:  # menangani invalid input
             print(
                 "===== Input Invalid! =====\n===== Mohon masukkan nomor yang tersedia! =====")
-            return  # Return from the function if input is invalid
 
-        # Fetch all data from the data_buku table
+        # mengambil data dari table data_buku
         cursor.execute("SELECT * FROM data_buku")
-        books = cursor.fetchall()
+        books = cursor.fetchall()   # mengambil seluruh baris dalat data_buku
 
-        # Check if the selected book number is within a valid range
+        # cek apakah input dalam range
         if 1 <= select_book <= len(books):
-            # Adjust the index to match the list (subtract 1)
+            # menyesuaikan dengan index ( - 1)
             book_num = books[select_book - 1]
-            # Display the book data to be deleted
+            # Tampilkan buku yang akan dihapus
             print(
                 f"No: {book_num[0]} | Judul Buku: {book_num[1]} | Penulis: {book_num[2]} | Penerbit: {book_num[3]} | Tahun Terbit: {book_num[4]}")
 
-            # Ask for confirmation before deletion
+            # konfirmasi sebelum dihapus
             konfirmasi = input(
                 "Anda yakin ingin menghapus data buku ini? (y/n): ").lower()
 
             if konfirmasi == "y":
-                # Delete the book data from the database
-                delete_query = "DELETE FROM data_buku WHERE nomor_buku = %s"
-                cursor.execute(delete_query, (book_num[0],))
+                # menghapus buku dari database
+                delete_query = "DELETE FROM data_buku WHERE judul_buku = %s"
+                cursor.execute(delete_query, (book_num[1],))
 
-                connection.commit()  # Commit changes to the database
-                print("Book deleted successfully!")
+                connection.commit()  # Commit perubahan ke database
+                print("===== Buku berhasil dihapus! =====")
             elif konfirmasi == "n":
-                print("Data tidak dihapus")
+                print("===== Data tidak dihapus =====")
             else:
-                print("Invalid input")
+                print("===== Invalid input =====")
 
         else:
-            print("Invalid nomor buku.")
+            print("====== Invalid nomor buku. =====")
 
-    except mysql.Error as err:
+    except mysql.Error as err:    # jika terjadi error maka tampilkan error
         print(f"Error: {err}")
 
-    finally:
-        # Close the database cursor and connection
-        if cursor:
+    finally:       # menutup database cursor
+        if cursor:  # jika cursor ada maka jjalankan kode di bawah
             cursor.close()
-        if connection:
+        if connection:  # jika koneksi ada maka jalankan kode di bawah
             connection.close()
 
 
 # input user untuk login/registrasi
-print('Type "login" if you already have an account')
-print('Type "regis" if you don\'t have an account yet')
-choice = input('Enter your choice (login/regis): ')
+print('Ketik login jika sudah memiliki akun')
+print('Ketik regis jika belum memiliki akun')
+choice = input('Masukkan pilihan anda (login/regis): ')
 
 # cek pilihan user
 if choice == 'regis':
