@@ -1,6 +1,6 @@
-import mysql.connector as mysql  # impor lib mysql connector
-import re
-from datetime import datetime, timedelta
+import mysql.connector as mysql  # import lib mysql connector
+import re   # import lib regex
+from datetime import datetime, timedelta  # import lib date
 
 # fungsi untuk menghubungkan ke mysql
 
@@ -16,17 +16,14 @@ def connect_to_database():
         )
         return connection
 
-    except mysql.Error as err:  # menangkap error pada mysql
-        print(f"Error: {err}")  # print error
+    except mysql.Error as err:  # return error pada mysql
+        print(f"Error: {err}")  # tampilkan error
 
-#
-# fungsi meminjam buku
-
-# membuat fungsi menu
+# fungsi menu
 
 
 def menu():
-    # menampilkan pilihan yang
+    # menampilkan pilihan yang tersedia
     print('===== [1] Tampilkan Data Buku =====')
     print('===== [2] Mengedit Data Buku =====')
     print('===== [3] Menambah Data Buku =====')
@@ -53,11 +50,11 @@ def menu():
 
 
 def register():
-    connection = connect_to_database()  # memanggil fungsi untuk koneksi ke database
-    if not connection:  # jika koneksi gagal print kode di bawah
-        print("===== Error Connection! =====")
+    # memanggil fungsi database lalu disimpan pada var connection
+    connection = connect_to_database()
+    cursor = connection.cursor()    # menggunakan fungsi cursor() sbg pointer
 
-    cursor = connection.cursor()  # digunakan untuk memanggil / mengeksekusi kode mysql
+    cursor = connection.cursor()  # memanggil / mengeksekusi kode mysql
 
     # meminta user untuk mengisikan username dan password
     username = input('Enter a new username: ')
@@ -66,7 +63,7 @@ def register():
     try:    # menggunakan try-except untuk cek apakah username / akun sudah ada
         # Cek apakah username sudah ada
         cursor.execute("SELECT * FROM users WHERE username = %s",
-                       (username,))  # memilih tabel users
+                       (username,))  # memilih username dari tabel users
         existing_user = cursor.fetchone()   # return/menangkap baris pertama
 
         if existing_user:   # jika kondisi ini terpenuhi jalankan kode dibawahnya
@@ -75,11 +72,9 @@ def register():
         else:   # jika kondisi sebelumnya tidk terpenuhi jalankan kode ini
             # input data user baru
             cursor.execute(
-                "INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))  # input data baru ke tabel users
-            cursor.execute(
-                "UPDATE users SET username = %s, password = %s WHERE id_users = %s")  # update perubahan ke databse
+                "INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))  # input data baru (username & password) ke tabel users
             connection.commit()  # commit perubahan
-            # print output jika akun tlah dibuat
+            # tampilkan output jika akun tlah dibuat
             print('===== Akun berhasil dibuat! =====')
 
     except mysql.Error as err:    # jika terjadi error maka tampilkan error
@@ -95,9 +90,9 @@ def register():
 
 
 def login():
-    connection = connect_to_database()  # memanggil fungsi ke database
-    if not connection:  # jika koneksi gagal print kode di bawah
-        print("===== Error Connection! =====")
+    # memanggil fungsi database lalu disimpan pada var connection
+    connection = connect_to_database()
+    cursor = connection.cursor()    # menggunakan fungsi cursor() sbg pointer
 
     cursor = connection.cursor()    # digunakan untuk memanggil / mengeksekusi kode mysql
 
@@ -108,13 +103,13 @@ def login():
     try:
         # menggunakan try-except untuk cek apakah username / akun sudah ada
         cursor.execute(
-            "SELECT * FROM users WHERE username = %s AND password = %s", (username, password))  # memilih tabel users
+            "SELECT * FROM users WHERE username = %s AND password = %s", (username, password))  # memilih username & password dari tabel users
         user = cursor.fetchone()    # return/menangkap baris pertama
 
-        if user:    # jjiika kondisi terpenuhi user akan menuju menu
+        if user:    # jika kondisi terpenuhi user akan menuju menu
             print('===== Selamat anda berhasil login! =====')
-            menu()
-        else:   # jika kondisi tidak terpenuhi maka kode di bawah akan diekskusi
+            menu()  # memanggil fungsi menu
+        else:   # jika kondisi tidak terpenuhi maka kode di bawah akan ditampilkan
             print('===== Username atau Password salah! =====')
 
     except mysql.Error as err:  # jika terjadi error maka tampilkan error
@@ -130,22 +125,22 @@ def login():
 
 
 def tampilkan_data_buku():
-    connection = connect_to_database()  # memanggil fungsi ke database
-    if not connection:  # jika koneksi gagal print kode di bawah
-        print("===== Error Connection! =====")
+    # memanggil fungsi database lalu disimpan pada var connection
+    connection = connect_to_database()
+    cursor = connection.cursor()    # menggunakan fungsi cursor() sbg pointer
 
-    cursor = connection.cursor()    # digunakan untuk memanggil / mengeksekusi kode mysql
+    cursor = connection.cursor()    # memanggil / mengeksekusi kode mysql
 
     try:
         cursor.execute(
-            "SELECT * FROM data_buku")    # memilih tabel dgn nama kolom tertentu
+            "SELECT * FROM data_buku")    # memilih tabel data_buku
         buku = cursor.fetchall()    # return/tangkap semua baris dlm tabel
 
         if buku:    # jika data buku ada
             for x in buku:  # looping sebanyak data buku
                 print(
-                    f"No: {x[0]} | Judul Buku: {x[1]} | Penulis: {x[2]} | Penerbit: {x[3]} | Tahun Terbit: {x[4]} |")  # tampilkan data buku
-        else:   # jika tidak ada data buku
+                    f"No: {str(x[0]):<2} | Judul Buku: {str(x[1]):<27} | Penulis: {str(x[2]):<20} | Penerbit: {str(x[3]):<25} | Tahun Terbit: {str(x[4]):<15} |")  # tampilkan data buku
+        else:   # jika tidak ada data buku tampilkan kode di bawah
             print("===== Data buku tidak ditemukan =====")
 
     except mysql.Error as err:    # jika terjadi error maka tampilkan error
@@ -161,95 +156,84 @@ def tampilkan_data_buku():
 
 
 def pinjam_buku():
+    # memanggil fungsi database lalu disimpan pada var connection
     connection = connect_to_database()
-    cursor = connection.cursor()
+    cursor = connection.cursor()    # menggunakan fungsi cursor() sbg pointer
 
     try:
-        cursor.execute("SELECT id_buku, judul_buku FROM data_buku")
-        books = cursor.fetchall()
+        # memilih id_buku dan, judul_buku dari tabel data_buku
+        cursor.execute(
+            "SELECT id_buku, judul_buku, ketersediaan FROM data_buku")
+        buku_avail = cursor.fetchall()   # return semua baris dalam tabel
 
-        if books:
-            print("===== Data Buku Tersedia =====")
-            for book in books:
-                print(f"- ID Buku: {book[0]} | Judul Buku: {book[1]}")
+        if buku_avail:
+            print("===== DATA BUKU YANG TERSEDIA =====")
+            for buku in buku_avail:
+                print(
+                    f"- No: {str(buku[0]):<2} | Judul Buku: {str(buku[1]):<37} | Ketersediaan: {str(buku[2]):<13} |")
 
-            print("\n===== Menu =====")
-            print("1. Cari Buku")
-            print("2. Pinjam Buku")
-            choice = input("Masukkan pilihan (1/2): ")
+            # tempat menyimpan data buku yang akan dipinjam (sementara)
+            temp_buku = []
 
-            if choice == '1':
-                judul_cari = input("Masukkan kata kunci pencarian: ")
-                matched_books = []
-                for book in books:
-                    match = re.search(judul_cari, book[1], re.IGNORECASE)
-                    if match:
-                        matched_books.append(book)
-                        print(f"- ID Buku: {book[0]} | Judul Buku: {book[1]}")
+            while True:
+                cari_judul = input(
+                    "Masukkan judul buku yang ingin Anda pinjam: ")
 
-                if matched_books:
+                match_book = []  # tempat menyimpan buku yang sesuai dengan yang dicari
+                for buku in buku_avail:
+                    cari = re.search(cari_judul, buku[1], re.IGNORECASE)
+                    if cari:
+                        match_book.append(buku)
+                        print(
+                            f"- ID Buku: {buku[0]} | Judul Buku: {buku[1]} | Ketersediaan: {buku[2]}")
+
+                if match_book:
                     judul_buku = input(
-                        "Masukkan judul buku yang ingin dipinjam: ")
-                    matched_book_ids = [
-                        book[0] for book in matched_books if judul_buku.lower() in book[1].lower()]
+                        "Masukkan judul buku yang ingin Anda pinjam: ")
+                    cocok = [match_book for match_book in match_book if judul_buku.lower(
+                    ) in match_book[1].lower()]
 
-                    if matched_book_ids:
-                        id_buku = matched_book_ids[0]
+                    if cocok:
+                        buku_pilihan = cocok[0]
+                        print(
+                            f"Buku {buku_pilihan[1]} dipilih untuk dipinjam. Ketersediaan: {buku_pilihan[2]}")
 
-                        nama_peminjam = input("Masukkan nama peminjam: ")
-                        no_telepon = input("Masukkan nomor telepon: ")
-                        alamat = input("Masukkan alamat: ")
+                        tambah_buku = input(
+                            "Apakah Anda ingin menambah buku lain? (y/n): ")
+                        if tambah_buku.lower() == 'n':
+                            temp_buku.append(buku_pilihan)
+                            break
+                        elif tambah_buku.lower() == 'y':
+                            temp_buku.append(buku_pilihan)
+                        else:
+                            print("Pilihan tidak valid.")
 
-                        # Tanggal pinjam
-                        tanggal_pinjam = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-                        # Menghitung tanggal pengembalian (contoh: 7 hari setelah peminjaman)
-                        tanggal_pengembalian = (
-                            datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
-
-                        # Menambah data peminjam ke tabel peminjaman dengan tanggal pengembalian
-                        cursor.execute("INSERT INTO data_pinjam (nama_peminjam, no_telepon, alamat, id_buku, tanggal_pinjam, tanggal_pengembalian) VALUES (%s, %s, %s, %s, %s, %s)",
-                                       (nama_peminjam, no_telepon, alamat, id_buku, tanggal_pinjam, tanggal_pengembalian))
-
-                        # Ubah status ketersediaan buku menjadi 'Not Available'
-                        cursor.execute("UPDATE data_buku SET ketersediaan = 'Not Available' WHERE id_buku = %s",
-                                       (id_buku,))
-                        connection.commit()
-                        print("===== Peminjaman Buku Berhasil! =====")
                     else:
                         print("Judul buku tidak valid atau buku tidak ditemukan.")
 
                 else:
                     print("Tidak ada buku yang sesuai dengan pencarian.")
 
-            elif choice == '2':
-                id_buku = input("Masukkan ID buku yang ingin dipinjam: ")
+            if temp_buku:
                 nama_peminjam = input("Masukkan nama peminjam: ")
                 no_telepon = input("Masukkan nomor telepon: ")
                 alamat = input("Masukkan alamat: ")
 
-                # Tanggal pinjam
                 tanggal_pinjam = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-                # Menghitung tanggal pengembalian (contoh: 7 hari setelah peminjaman)
-                tanggal_pengembalian = (
-                    datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
+                for buku in temp_buku:
+                    # Menambah data peminjam ke tabel peminjaman
+                    cursor.execute("INSERT INTO data_pinjam (nama_peminjam, no_telepon, alamat, tanggal_pinjam, id_buku) VALUES (%s, %s, %s, %s, %s)",
+                                   (nama_peminjam, no_telepon, alamat, buku[0], tanggal_pinjam))
 
-                # Menambah data peminjam ke tabel peminjaman dengan tanggal pengembalian
-                cursor.execute("INSERT INTO data_pinjam (nama_peminjam, no_telepon, alamat, id_buku, tanggal_pinjam, tanggal_pengembalian) VALUES (%s, %s, %s, %s, %s, %s)",
-                               (nama_peminjam, no_telepon, alamat, id_buku, tanggal_pinjam, tanggal_pengembalian))
-
-                # Ubah status ketersediaan buku menjadi 'Not Available'
-                cursor.execute("UPDATE data_buku SET ketersediaan = 'Not Available' WHERE id_buku = %s",
-                               (id_buku,))
-                connection.commit()
-                print("===== Peminjaman Buku Berhasil! =====")
-
-            else:
-                print("Pilihan tidak valid!")
+                    # Ubah status ketersediaan buku menjadi 'Not Available'
+                    cursor.execute("UPDATE data_buku SET ketersediaan = 'Not Available' WHERE id_buku = %s",
+                                   (buku[0],))
+                    connection.commit()
+                    print("===== Peminjaman Buku Berhasil! =====")
 
         else:
-            print("Tidak ada data buku tersedia.")
+            print("Tidak ada buku yang tersedia.")
 
     except mysql.Error as err:
         print(f"Error: {err}")
